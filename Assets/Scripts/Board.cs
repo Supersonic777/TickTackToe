@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class Board : MonoBehaviour
 {
+    public GameObject replayButton;
+    public GameObject board;
    [Header("Input Settings: ")]
-   [SerializeField] private LayerMask boxesLayerMask;
-   [SerializeField] private float touchRadius;
+   [SerializeField] private LayerMask boxesLayerMask;   [SerializeField] private float touchRadius;
 
    [Header("Mark Sprites: ")]
    [SerializeField] private Sprite spriteX;
@@ -70,16 +71,22 @@ public class Board : MonoBehaviour
             if(currentMark.ToString() == "O")
             {
                 winMessage.GetComponent<SpriteRenderer>().sprite = spriteWinO;
+                GameFinish();
+
             }
             else if(currentMark.ToString() == "X")
             {
                 winMessage.GetComponent<SpriteRenderer>().sprite = spriteWinX;
+                board.SetActive(false);
+                GameFinish();
             }
             return;
         }
         else if(allSteps == 0)
         {
             winMessage.GetComponent<SpriteRenderer>().sprite = spriteStandoff;
+            board.SetActive(false);
+            GameFinish();
         }
 
         SwitchPlayer();
@@ -111,5 +118,11 @@ public class Board : MonoBehaviour
    private Sprite GetSprite()
    {
         return (currentMark == Mark.X) ? spriteX : spriteO;
+   }
+
+   private void GameFinish()
+   {
+        board.SetActive(false);
+        replayButton.SetActive(true);
    }
 }
