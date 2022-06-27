@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class Board : MonoBehaviour
 {
+    public bool isSingleplayer;
     public GameObject replayButton;
     public GameObject board;
+    public GameObject[] boxes;
    [Header("Input Settings: ")]
    [SerializeField] private LayerMask boxesLayerMask;   [SerializeField] private float touchRadius;
 
@@ -19,6 +21,8 @@ public class Board : MonoBehaviour
 
    [Header("Sound effects: ")]
    [SerializeField] private AudioClip boxClick;
+
+   private bool enemyCanStep;
    private AudioSource audioSource;
 
    public Mark[] marks;
@@ -34,11 +38,12 @@ public class Board : MonoBehaviour
     cam = Camera.main;
     currentMark = Mark.X;
     marks = new Mark[9];
+    enemyCanStep = false;
    }
    
    private void Update()
    {
-      if(Input.GetMouseButtonUp(0))
+      if((Input.GetMouseButtonUp(0) && currentMark == Mark.X) || (Input.GetMouseButtonUp(0) && !isSingleplayer))
       {
           Vector2 touchPosition = cam.ScreenToWorldPoint(Input.mousePosition);
 
@@ -48,6 +53,11 @@ public class Board : MonoBehaviour
           {
              HitBox(hit.GetComponent<Box>());
           }
+      }
+      else if(isSingleplayer && enemyCanStep==true && !CheckIfWin())
+      {
+        Invoke("EnemyStep", Random.Range(1,3));
+        enemyCanStep = false;
       }
    }
 
@@ -64,29 +74,18 @@ public class Board : MonoBehaviour
         box.SetAsMarked(GetSprite(), currentMark); 
 
         bool won = CheckIfWin();
+        enemyCanStep = true;
 
         if(won)
         {
-            Debug.Log(currentMark.ToString() + " wins!");
-            if(currentMark.ToString() == "O")
-            {
-                winMessage.GetComponent<SpriteRenderer>().sprite = spriteWinO;
-                GameFinish();
-
-            }
-            else if(currentMark.ToString() == "X")
-            {
-                winMessage.GetComponent<SpriteRenderer>().sprite = spriteWinX;
-                board.SetActive(false);
-                GameFinish();
-            }
+            Invoke("GameFinish", 2.0f);
             return;
         }
         else if(allSteps == 0)
         {
             winMessage.GetComponent<SpriteRenderer>().sprite = spriteStandoff;
-            board.SetActive(false);
-            GameFinish();
+            Invoke("GameFinish", 2.0f);
+            return;
         }
 
         SwitchPlayer();
@@ -122,7 +121,58 @@ public class Board : MonoBehaviour
 
    private void GameFinish()
    {
-        board.SetActive(false);
-        replayButton.SetActive(true);
+    Debug.Log(currentMark.ToString() + " wins!");
+
+    if(currentMark.ToString() == "O")
+    {
+        winMessage.GetComponent<SpriteRenderer>().sprite = spriteWinO;
+    }
+    else if(currentMark.ToString() == "X")
+    {
+        winMessage.GetComponent<SpriteRenderer>().sprite = spriteWinX;
+    }
+
+    board.SetActive(false);
+    replayButton.SetActive(true);
+   }
+
+    private void EnemyStep()
+   {
+    // int[] nuleBoxesList = new int[9];
+    //     for(int i = 0; i < 9; i++)
+    //     {
+    //         if(boxes[i].GetComponent<Box>().index == 0)
+    //         {
+    //             nuleBoxesList[i] = boxes[i].GetComponent<Box>().index;
+    //         }
+    //     }
+        for(int i = 0; i < 9; i++)
+        {
+            if(marks[i] == Mark.None)
+            {
+                allSteps -=1;
+                Debug.Log(allSteps);
+                audioSource.PlayOneShot(boxClick);
+            
+                marks [boxes[i].GetComponent<Box>().index] = currentMark;
+                boxes[i].GetComponent<Box>().SetAsMarked(GetSprite(), currentMark); 
+                bool won = CheckIfWin();
+
+                if(won)
+                {
+                    Invoke("GameFinish", 2.0f);
+                    return;
+                }
+                else if(allSteps == 0)
+                {
+                    winMessage.GetComponent<SpriteRenderer>().sprite = spriteStandoff;
+                    Invoke("GameFinish", 2.0f);
+                    return;
+                }
+
+                SwitchPlayer();
+                return;
+            }
+        }
    }
 }
