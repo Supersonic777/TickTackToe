@@ -3,12 +3,12 @@ using UnityEngine.SceneManagement;
 
 public class ButtonController : MonoBehaviour
 {
-   [Header("Game mode buttons: ")]
-   [SerializeField] private GameObject singleplayerButton;
-   [SerializeField] private GameObject pvpButton;
-   [SerializeField] private GameObject optionsButton;
-   [SerializeField] private GameObject exitButton;
+    private Design design;
 
+    [Header("Game mode buttons: ")]
+    [SerializeField] private GameObject MainMenu;
+    [SerializeField] private GameObject GamemodeMenu;
+    [SerializeField] private GameObject OptionsMenu;
 
     public void OnReplayButtonDown()
     {
@@ -27,20 +27,32 @@ public class ButtonController : MonoBehaviour
 
     public void OnPlayButtonDown()
     {
-        gameObject.SetActive(false);
-        singleplayerButton.SetActive(true);
-        pvpButton.SetActive(true);
-        exitButton.SetActive(false);
-        optionsButton.SetActive(false);
+        MainMenu.SetActive(false);
+        GamemodeMenu.SetActive(true);
+    }
+
+    public void OnOptionsButtonDown()
+    {
+        MainMenu.SetActive(false);
+        OptionsMenu.SetActive(true);
     }
 
     public void OnPvpButtonDown()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("PvP");
     }
 
     public void OnSingleplayerButtonDown()
     {
         SceneManager.LoadScene("Singleplayer");
     }
+
+    public void OnBackButtonDown()
+    {
+        MainMenu.SetActive(true);
+        GamemodeMenu.SetActive(false);
+        OptionsMenu.SetActive(false);
+    }
+
+
 }
